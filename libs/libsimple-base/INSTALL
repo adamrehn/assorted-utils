@@ -1,0 +1,6 @@
+
+1.) Type 'make' to build the library. You will need MinGW under Windows.
+
+2.) Type 'sudo make install' to install the library under Unix-based systems.
+    Under Windows, set the environment variable PREFIX to the MinGW installation
+    directory (e.g.: "C:\MinGW"), and then type 'make install'.
