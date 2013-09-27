@@ -14,6 +14,7 @@ Directory Structure
 	<strong>/libs</strong><br />Libraries
 	<ul>
 		<li>libs/<strong>libsimple-base</strong> - the base library utilised by the majority of the tools and other libraries.</li>
+		<li>libs/<strong>libsimplesock</strong> - lightweight socket wrapper library for working with BSD sockets under Unix-like OSes and WinSock under Windows.</li>
 	</ul>
 </li>
 <li>

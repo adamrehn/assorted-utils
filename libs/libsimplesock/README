@@ -1,0 +1,27 @@
+SimpleSock README
+-----------------
+
+1.) About
+
+This library is a conventient little abstraction to help with using BSD sockets
+under Unix-based OSes, and WinSock under Windows.
+
+
+2.) Installation and Usage
+
+See the file INSTALL for installation instructions.
+
+To use the library in an application, use the preprocessor directive
+
+#include <simplesock/SimpleSock.h>
+
+and add "-lsimplesock" to the compiler options to link with the static library.
+
+
+3.) License
+
+This library is licensed under the GNU Lesser General Public License (LGPL).
+See the file COPYING for details.
+
+Most of the code is based on information from the official WinSock documentation,
+and Beej's Guide to Network Programming <http://beej.us/guide/bgnet/>
