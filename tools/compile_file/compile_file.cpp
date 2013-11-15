@@ -47,9 +47,14 @@ int main (int argc, char *argv[])
 				size_t length = infile.tellg();
 				infile.seekg(0, ios::beg);
 				
-				//This will transform the filename into a constant variable style, e.g: "file.dat" becomes "FILE_DAT"
-				string filename = strtoupper(strip_chars(" '~!@#$%^&()+[]{}", str_replace(".", "_", basename(string(argv[i])))));
-				string outpath = string(dirname(string(argv[i])) + strtolower(filename) + ".c");
+				//Transform the filename into a constant variable style, e.g: "file.dat" becomes "FILE_DAT"
+				string filename = basename(string(argv[i]));
+				filename =  str_replace(".", "_", filename);
+				filename =  str_replace("-", "_", filename);
+				filename = strip_chars(" '~!@#$%^&()+[]{}", filename);
+				filename = strtoupper(filename);
+				string outpath    = string(dirname(string(argv[i])) + strtolower(filename) + ".c");
+				string headerpath = string(dirname(string(argv[i])) + strtolower(filename) + ".h");
 				
 				//Open the output file, which will be the transformed filename with a .c extension (following the earlier example, "file.dat" becomes "file_dat.c")
 				ofstream outfile(outpath.c_str(), ios::binary);
@@ -79,6 +84,24 @@ int main (int argc, char *argv[])
 					//Finish the array (making sure we add a newline to keep certain versions of GCC happy), and close the output file
 					outfile << "\n};" << endl;
 					outfile.close();
+				}
+				else {
+					clog << "Error: failed to open output file!" << endl;
+				}
+				
+				//Generate a header file to accompany the generated C file
+				ofstream headerfile(headerpath.c_str(), ios::binary);
+				if (headerfile.is_open())
+				{
+					headerfile << "#ifndef _" << filename << "_H" << endl;
+					headerfile << "#define _" << filename << "_H" << endl << endl;
+					headerfile << "extern const int SIZEOF_" << filename << ";" << endl;
+					headerfile << "extern const char " << filename << "[];" << endl << endl;
+					headerfile << "#endif" << endl;
+					headerfile.close();
+				}
+				else {
+					clog << "Error: failed to open header file!" << endl;
 				}
 			}
 		}
