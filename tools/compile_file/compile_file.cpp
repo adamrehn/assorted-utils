@@ -62,7 +62,7 @@ int main (int argc, char *argv[])
 				{
 					//Each file becomes a constant integer storing its length, and a character array holding all of the individual bytes
 					outfile << "const int SIZEOF_" << filename << " = " << length << ";" << endl;
-					outfile << "const char " << filename << "[" << length << "] = {\n";
+					outfile << "const unsigned char " << filename << "[" << length << "] = {\n";
 					
 					//Read the file one block at a time
 					char buffer[BUFSIZE];
@@ -95,8 +95,8 @@ int main (int argc, char *argv[])
 				{
 					headerfile << "#ifndef _" << filename << "_H" << endl;
 					headerfile << "#define _" << filename << "_H" << endl << endl;
-					headerfile << "extern const int SIZEOF_" << filename << ";" << endl;
-					headerfile << "extern const char " << filename << "[];" << endl << endl;
+					headerfile << "extern \"C\" const int SIZEOF_" << filename << ";" << endl;
+					headerfile << "extern \"C\" const unsigned char " << filename << "[];" << endl << endl;
 					headerfile << "#endif" << endl;
 					headerfile.close();
 				}
