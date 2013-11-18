@@ -495,6 +495,62 @@ void SimpleSock::CloseSocket(int sock)
 	#endif
 }
 
+#ifndef _WIN32
+
+std::vector<std::string> SimpleSock::GetNetworkInterfaces()
+{
+	std::vector<std::string> networkInterfaces;
+	
+	struct ifaddrs *interfaces = NULL;
+	if (getifaddrs(&interfaces) == 0)
+	{
+		//Iterate through the linked list of network interfaces
+		struct ifaddrs *currInterface = interfaces;
+		while (currInterface != NULL)
+		{
+			//Only include IPv4 and IPv6 connections
+			if (currInterface->ifa_addr->sa_family == AF_INET || currInterface->ifa_addr->sa_family == AF_INET6)
+			{
+				networkInterfaces.push_back( std::string(currInterface->ifa_name) );
+			}
+			
+			currInterface = currInterface->ifa_next;
+		}
+	}
+	
+	freeifaddrs(interfaces);
+	return networkInterfaces;
+}
+
+std::string SimpleSock::GetAddressForInterface(const std::string& interfaceToCheck)
+{
+	std::string identifiedAddress = "";
+	
+	struct ifaddrs *interfaces = NULL;
+	if (getifaddrs(&interfaces) == 0)
+	{
+		//Iterate through the linked list of network interfaces
+		struct ifaddrs *currInterface = interfaces;
+		while (currInterface != NULL)
+		{
+			//Only include IPv4 and IPv6 connections
+			if (currInterface->ifa_addr->sa_family == AF_INET || currInterface->ifa_addr->sa_family == AF_INET6)
+			{
+				if (std::string(currInterface->ifa_name) == interfaceToCheck) {
+					identifiedAddress = std::string(inet_ntoa(((struct sockaddr_in *)currInterface->ifa_addr)->sin_addr));               
+				}
+			}
+			
+			currInterface = currInterface->ifa_next;
+		}
+	}
+	
+	freeifaddrs(interfaces);
+	return identifiedAddress;
+}
+
+#endif
+
 //Adapted from code from <http://stackoverflow.com/questions/3217650/how-can-i-find-the-socket-type-from-the-socket-descriptor>
 int SimpleSock::GetSocketType(int sock)
 {

@@ -28,6 +28,7 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <vector>
 #include <stdexcept>
 
 class SimpleSockException : public std::runtime_error
@@ -54,6 +55,7 @@ namespace NBReadStatus
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
 	#include <netdb.h>
+	#include <ifaddrs.h>
 #endif
 
 class SimpleSock
@@ -65,6 +67,8 @@ class SimpleSock
 		static int CreateSocket(int addressFamily, int type, int protocol);
 		static int CreateSocketTcp(bool IPV6 = false);
 		static int CreateSocketUdp(bool IPV6 = false);
+		
+		static void CloseSocket(int sock);
 		
 		static bool SetBlocking(int sock);
 		static bool SetNonBlocking(int sock);
@@ -91,7 +95,13 @@ class SimpleSock
 		static std::string GetPeerAddressFromStruct(sockaddr* peerDetails);
 		static int GetPeerPortFromStruct(sockaddr* peerDetails);
 		
-		static void CloseSocket(int sock);
+		#ifndef _WIN32
+		
+		//Network interface information
+		static std::vector<std::string> GetNetworkInterfaces();
+		static std::string GetAddressForInterface(const std::string& interfaceToCheck);
+		
+		#endif
 		
 	private:
 		static bool throwExceptions;
