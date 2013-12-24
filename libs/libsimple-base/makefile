@@ -47,7 +47,7 @@ ifeq ($(UNAME), Darwin)
 	ifeq ($(SDKROOT),)
 		MESSAGE := $(MESSAGE), produce fat object files and static lib...
 		CXXFLAGS += -Wall -arch i386 -arch x86_64
-		CREATELIB = libtool -static -o ./lib/libsimple-base.a $(SRC_DIR)/*.o
+		CREATELIB = libtool -static -o $(BUILD_DIR)/lib/libsimple-base.a $(OBJECTS)
 		
 		# Under OSX, we generate libsimple-osx-compat.dylib (two versions - a normal one, and one designed to be stored in the application bundle with apps that link against it)
 		OSX_COMPAT_OBJECTS = $(BUILD_DIR)/obj/osx-compat/osx-compat_fsevents.o
@@ -131,6 +131,7 @@ endif
 dirs:
 	@test -d $(BUILD_DIR) || mkdir $(BUILD_DIR)
 	@test -d $(BUILD_DIR)/obj || mkdir $(BUILD_DIR)/obj
+	@test -d $(BUILD_DIR)/obj/osx-compat || mkdir $(BUILD_DIR)/obj/osx-compat
 	@test -d $(BUILD_DIR)/lib || mkdir $(BUILD_DIR)/lib
 	@test -d $(BUILD_DIR)/include || mkdir $(BUILD_DIR)/include
 	@test -d $(BUILD_DIR)/include/simple-base || mkdir $(BUILD_DIR)/include/simple-base
