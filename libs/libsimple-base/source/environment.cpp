@@ -153,12 +153,12 @@ string get_env(const string& var)
 		HANDLE stdInput[2];
 		HANDLE stdOutput[2];
 		HANDLE stdError[2];
-		if (CreatePipe(&stdInput[0],  &stdInput[1],  &saAttr, 0) == 0) return ExternalCommand::PipeRedirectionFailureSentinel;
+		if (CreatePipe(&stdInput[0],  &stdInput[1],  &saAttr, 0) == 0) return -1;
 		if (CreatePipe(&stdOutput[0], &stdOutput[1], &saAttr, 0) == 0)
 		{
 			CloseHandle(stdInput[0]);
 			CloseHandle(stdInput[1]);
-			return ExternalCommand::PipeRedirectionFailureSentinel;
+			return -1;
 		}
 		if (CreatePipe(&stdError[0],  &stdError[1],  &saAttr, 0) == 0)
 		{
@@ -166,7 +166,7 @@ string get_env(const string& var)
 			CloseHandle(stdInput[1]);
 			CloseHandle(stdOutput[0]);
 			CloseHandle(stdOutput[1]);
-			return ExternalCommand::PipeRedirectionFailureSentinel;
+			return -1;
 		}
 		
 		//Ensure the read handle to the pipe for STDOUT is not inherited.
