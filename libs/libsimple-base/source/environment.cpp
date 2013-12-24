@@ -139,7 +139,7 @@ string get_env(const string& var)
 //Creating child processes is a very different affair under Windows when compared to POSIX-compliant operating systems
 #ifdef _WIN32
 	
-	int executeProcessWithPipes(const std::string& command, const string& writeThisToStdin, string& thisReceivesStdOut, string& thisReceivesStdErr, bool combineStdErrWithStdOut)
+	int executeProcessWithPipes(const std::string& command, const string& writeThisToStdIn, string& thisReceivesStdOut, string& thisReceivesStdErr, bool combineStdErrWithStdOut)
 	{
 		//---- Stage 1 - Pipe Creation ----
 		
@@ -256,7 +256,7 @@ string get_env(const string& var)
 
 	#define MAX_ARGV_ARGS 255
 	
-	int executeProcessWithPipes(const std::string& command, const string& writeThisToStdin, string& thisReceivesStdOut, string& thisReceivesStdErr, bool combineStdErrWithStdOut)
+	int executeProcessWithPipes(const std::string& command, const string& writeThisToStdIn, string& thisReceivesStdOut, string& thisReceivesStdErr, bool combineStdErrWithStdOut)
 	{
 		//Create the pipes
 		int pStdIn[2];
