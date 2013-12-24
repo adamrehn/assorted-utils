@@ -158,7 +158,7 @@ void sha1_file_raw(const string& file, unsigned int checksum[5])
 		infile.close();
 	}
 	else {
-		throw std::runtime_error("Couldn't open file!");
+		throw std::runtime_error("Could not open input file \"" + file + "\"");
 	}
 }
 
