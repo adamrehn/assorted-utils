@@ -47,7 +47,7 @@ string generate_unique_filename();            //Generates a unique file name in 
 string get_env(const string& var);
 
 //Executes a command, writing to its stdin, retrieving the stdout and stderr, and returns the return code
-int executeProcessWithPipes(const std::string& command, const string& writeThisToStdin, string& thisReceivesStdOut, string& thisReceivesStdErr, bool combineStdErrWithStdOut = false);
+int executeProcessWithPipes(const std::string& command, const string& writeThisToStdIn, string& thisReceivesStdOut, string& thisReceivesStdErr, bool combineStdErrWithStdOut = false);
 
 //Uses platform-specific CLI functionality to get a password without displaying the characters
 string get_cli_password_hidden(string prompt);

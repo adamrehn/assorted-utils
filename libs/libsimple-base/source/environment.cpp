@@ -153,12 +153,12 @@ string get_env(const string& var)
 		HANDLE stdInput[2];
 		HANDLE stdOutput[2];
 		HANDLE stdError[2];
-		if (CreatePipe(&stdInput[0],  &stdInput[1],  &saAttr, 0) == 0) return -1;
+		if (CreatePipe(&stdInput[0],  &stdInput[1],  &saAttr, 0) == 0) return ExternalCommand::PipeRedirectionFailureSentinel;
 		if (CreatePipe(&stdOutput[0], &stdOutput[1], &saAttr, 0) == 0)
 		{
 			CloseHandle(stdInput[0]);
 			CloseHandle(stdInput[1]);
-			return -1;
+			return ExternalCommand::PipeRedirectionFailureSentinel;
 		}
 		if (CreatePipe(&stdError[0],  &stdError[1],  &saAttr, 0) == 0)
 		{
@@ -166,7 +166,7 @@ string get_env(const string& var)
 			CloseHandle(stdInput[1]);
 			CloseHandle(stdOutput[0]);
 			CloseHandle(stdOutput[1]);
-			return -1;
+			return ExternalCommand::PipeRedirectionFailureSentinel;
 		}
 		
 		//Ensure the read handle to the pipe for STDOUT is not inherited.
@@ -200,17 +200,14 @@ string get_env(const string& var)
 		if (CreateProcess(NULL, const_cast<char*>(command.c_str()), NULL, NULL, true, 0, NULL, NULL, &sInfo, &pInfo))
 		{
 			//Write the data to the child's stdin
-			if (writeThisToStdin.length() > 0)
+			if (writeThisToStdIn.length() > 0)
 			{
 				DWORD bytesWritten = 0;
-				WriteFile(stdInput[1], writeThisToStdin.data(), (DWORD)(writeThisToStdin.length()), &bytesWritten, NULL);
+				WriteFile(stdInput[1], writeThisToStdIn.data(), (DWORD)(writeThisToStdIn.length()), &bytesWritten, NULL);
 			}
 			
 			//Close the write handle for the child's stdin
 			CloseHandle(stdInput[1]);
-			
-			//Wait for the child to complete
-			WaitForSingleObject(pInfo.hProcess, INFINITE);
 			
 			//Close the read handle for the child's stdin
 			CloseHandle(stdInput[0]);
@@ -237,6 +234,9 @@ string get_env(const string& var)
 			CloseHandle(stdOutput[0]);
 			CloseHandle(stdError[0]);
 			
+			//Wait for the child to complete
+			WaitForSingleObject(pInfo.hProcess, INFINITE);
+			
 			//Retrieve the exit code of the child process
 			DWORD returnVal = -1;
 			GetExitCodeProcess(pInfo.hProcess, &returnVal);
@@ -256,7 +256,7 @@ string get_env(const string& var)
 
 	#define MAX_ARGV_ARGS 255
 	
-	int executeProcessWithPipes(const std::string& command, const byteBlock& writeThisToStdin, byteBlock& thisReceivesStdOut, byteBlock& thisReceivesStdErr, bool combineStdErrWithStdOut)
+	int executeProcessWithPipes(const std::string& command, const string& writeThisToStdin, string& thisReceivesStdOut, string& thisReceivesStdErr, bool combineStdErrWithStdOut)
 	{
 		//Create the pipes
 		int pStdIn[2];
@@ -321,15 +321,18 @@ string get_env(const string& var)
 			
 			//Break the command into argv components
 			vector<string> argvStructure = argv_from_string(command);
-			char* argv[MAX_ARGV_ARGS];
+			char* argv[__MAX_ARGV_ARGS];
 			unsigned int argvIndex = 0;
-			for (; argvIndex < (MAX_ARGV_ARGS - 1) && argvIndex < argvStructure.size(); ++argvIndex) {
+			for (; argvIndex < (__MAX_ARGV_ARGS - 1) && argvIndex < argvStructure.size(); ++argvIndex) {
 				argv[argvIndex] = const_cast<char*>(argvStructure[argvIndex].c_str());
 			}
 			argv[argvIndex] = NULL;
 			
 			//Execute the command
 			execvp(argv[0], argv);
+			
+			//If we reach this point, we failed to execute the command
+			exit(-1);
 		}
 		else
 		{
@@ -341,31 +344,31 @@ string get_env(const string& var)
 			close(pStdErr[1]);
 			
 			//Write any data to the child's stdin
-			if (writeThisToStdin.length() > 0) {
-				write(pStdIn[1], writeThisToStdin.data(), writeThisToStdin.length());
+			if (writeThisToStdIn.length() > 0) {
+				write(pStdIn[1], writeThisToStdIn.data(), writeThisToStdIn.length());
 			}
 			close(pStdIn[1]);
-			
-			//Wait for the child process to complete and retrieve the return code
-			int returnCode = -1;
-			int status = 0;
-			wait(&status);
-			if (WIFEXITED(status)) {
-				returnCode = WEXITSTATUS(status);
-			}
 			
 			//Read data from the child's stdout
 			char buffStdOut[100];
 			size_t bytesReadStdOut = 0;
 			while ((bytesReadStdOut = read(pStdOut[0], buffStdOut, sizeof(buffStdOut))) > 0) {
-				thisReceivesStdOut.appendData(buffStdOut, bytesReadStdOut);
+				thisReceivesStdOut.append(buffStdOut, bytesReadStdOut);
 			}
 			
 			//Read data from the child's stderr
 			char buffStdErr[100];
 			size_t bytesReadStdErr = 0;
 			while ((bytesReadStdErr = read(pStdErr[0], buffStdErr, sizeof(buffStdErr))) > 0) {
-				thisReceivesStdErr.appendData(buffStdErr, bytesReadStdErr);
+				thisReceivesStdErr.append(buffStdErr, bytesReadStdErr);
+			}
+			
+			//Wait for the child process to complete and retrieve the return code
+			int returnCode = -1;
+			int status = 0;
+			waitpid(childPid, &status, 0);
+			if (WIFEXITED(status)) {
+				returnCode = WEXITSTATUS(status);
 			}
 			
 			//Close the remaining ends of the pipes
