@@ -254,7 +254,7 @@ string get_env(const string& var)
 	
 #else
 
-	#define MAX_ARGV_ARGS 255
+	#define __MAX_ARGV_ARGS 255
 	
 	int executeProcessWithPipes(const std::string& command, const string& writeThisToStdIn, string& thisReceivesStdOut, string& thisReceivesStdErr, bool combineStdErrWithStdOut)
 	{
@@ -382,7 +382,7 @@ string get_env(const string& var)
 		return -1;
 	}
 	
-	#undef MAX_ARGV_ARGS
+	#undef __MAX_ARGV_ARGS
 	
 #endif
 
