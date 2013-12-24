@@ -21,6 +21,7 @@ Directory Structure
 	<strong>/tools</strong><br />Tools
 	<ul>
 		<li>tools/<strong>compile_file</strong> - utility to create C-code byte array representations of binary files, suitable for embedding in executables.</li>
+		<li>tools/<strong>mergelib</strong> - utility to merge one or more static libraries into a single output static library, utilising "libtool" under Darwin and "ar" under all other platforms.</li>
 	</ul>
 </li>
 </ul>
