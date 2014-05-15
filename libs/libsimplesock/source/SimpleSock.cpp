@@ -346,6 +346,17 @@ bool SimpleSock::Connect(int sock, const char* address, int port)
 
 bool SimpleSock::JoinMulticastGroup(int udpSock, const char* address, int port, bool IPV6)
 {
+	//Set SO_REUSEADDR for the socket so that other sockets may bind to the same source multicast address
+	//(SO_REUSEADDR and SO_REUSEPORT are treated identically for multicast addresses, according to
+	//<http://stackoverflow.com/questions/14388706/socket-options-so-reuseaddr-and-so-reuseport-how-do-they-differ-do-they-mean-t/14388707#14388707>
+	//so we use SO_REUSEADDR for maximum portability)
+	int reuse = 1;
+	#ifdef _WIN32
+	setsockopt(udpSock, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse));
+	#else
+	setsockopt(udpSock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+	#endif
+	
 	//Bind the socket to the desired port on 0.0.0.0
 	struct sockaddr_in localEndpoint;
 	localEndpoint.sin_family      = (IPV6) ? AF_INET6 : AF_INET;
