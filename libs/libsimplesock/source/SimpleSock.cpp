@@ -344,6 +344,41 @@ bool SimpleSock::Connect(int sock, const char* address, int port)
 	return false;
 }
 
+bool SimpleSock::JoinMulticastGroup(int udpSock, const char* address, int port, bool IPV6)
+{
+	//Bind the socket to the desired port on 0.0.0.0
+	struct sockaddr_in localEndpoint;
+	localEndpoint.sin_family      = (IPV6) ? AF_INET6 : AF_INET;
+	localEndpoint.sin_addr.s_addr = htonl(INADDR_ANY);
+	localEndpoint.sin_port        = htons(port);
+	if (bind(udpSock, (struct sockaddr*)&localEndpoint, sizeof(localEndpoint)) == -1) {
+		return false;
+	}
+	
+	struct ip_mreq mreq;
+	mreq.imr_multiaddr.s_addr = inet_addr(address);
+	mreq.imr_interface.s_addr = INADDR_ANY;
+	
+	#ifdef _WIN32
+	return (setsockopt(udpSock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*)&mreq, sizeof(mreq)) != -1);
+	#else
+	return (setsockopt(udpSock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) != -1);
+	#endif
+}
+
+bool SimpleSock::LeaveMulticastGroup(int udpSock, const char* address, int port, bool IPV6)
+{
+	struct ip_mreq mreq;
+	mreq.imr_multiaddr.s_addr = inet_addr(address);
+	mreq.imr_interface.s_addr = INADDR_ANY;
+	
+	#ifdef _WIN32
+	return (setsockopt(udpSock, IPPROTO_IP, IP_DROP_MEMBERSHIP, (const char*)&mreq, sizeof(mreq)) != -1);
+	#else
+	return (setsockopt(udpSock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) != -1);
+	#endif
+}
+
 std::string SimpleSock::GetLocalAddressFromSock(int sock)
 {
 	//Create a std::string to hold the human-readable result

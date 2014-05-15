@@ -83,6 +83,10 @@ class SimpleSock
 		//For UDP sockets instead of sendto (resolves remote address for you)
 		static int UdpSendTo(int udpSock, const char* address, int port, const char* buffer, int bufSize, bool IPV6);
 		
+		//Joining and leaving multicast groups
+		static bool JoinMulticastGroup(int udpSock, const char* address, int port, bool IPV6 = false);
+		static bool LeaveMulticastGroup(int udpSock, const char* address, int port, bool IPV6 = false);
+		
 		//Getting local info from sockets
 		static std::string GetLocalAddressFromSock(int sock);
 		static int GetLocalPortFromSock(int sock);

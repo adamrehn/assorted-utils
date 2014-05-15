@@ -47,7 +47,7 @@ ifeq ($(UNAME), Darwin)
 	ifeq ($(SDKROOT),)
 		MESSAGE := $(MESSAGE), produce fat object files and static lib...
 		CXXFLAGS += -Wall -arch i386 -arch x86_64
-		CREATELIB = libtool -static -o ./lib/libsimplesock.a $(SRC_DIR)/*.o
+		CREATELIB = libtool -static -o $(BUILD_DIR)/lib/libsimplesock.a $(OBJECTS)
 	else
 		
 		# When compiling for iOS, the static library will be built as single-architecture and then combined with other architectures using lipo
