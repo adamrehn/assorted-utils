@@ -44,12 +44,18 @@ namespace NBReadStatus
 	const static int Disconnected   = 2;
 }
 
+//When compiling under Windows, be sure to add -lwsock32 -lws2_32
 #ifdef _WIN32
-	//When compiling under Windows, be sure to add -lwsock32 -lws2_32
+	//Under MinGW, the default targeted version of Windows may be too old for WinSock2
+	#ifdef _WIN32_WINNT
+		#undef _WIN32_WINNT
+	#endif
 	#ifdef WINVER
 		#undef WINVER
 	#endif
-	#define WINVER 0x0501
+	#define _WIN32_WINNT 0x0501
+	#define WINVER _WIN32_WINNT
+	
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
 	#define socklen_t int
