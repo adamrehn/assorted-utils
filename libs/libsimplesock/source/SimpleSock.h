@@ -46,6 +46,9 @@ namespace NBReadStatus
 
 #ifdef _WIN32
 	//When compiling under Windows, be sure to add -lwsock32 -lws2_32
+	#ifdef WINVER
+		#undef WINVER
+	#endif
 	#define WINVER 0x0501
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
