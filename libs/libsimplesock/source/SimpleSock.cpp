@@ -24,6 +24,10 @@
 */
 #include "SimpleSock.h"
 
+#ifndef _WIN32
+	#include <sys/time.h>
+#endif
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -207,6 +211,23 @@ int SimpleSock::PerformNonBlockingReceiveUdp(int sock, char* buffer, int bufSize
 			return NBReadStatus::Disconnected;
 		}
 	}
+}
+
+bool SimpleSock::SetReceiveTimeout(int sock, unsigned int seconds, unsigned int microseconds)
+{
+	#ifdef _WIN32
+		
+		DWORD milliseconds = (seconds * 1000) + (microseconds / 1000);
+		return (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&milliseconds, sizeof(milliseconds)) == 0);
+		
+	#else
+		
+		struct timeval tv;
+		tv.tv_sec = seconds;
+		tv.tv_usec = microseconds; 
+		return (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval)) == 0);
+		
+	#endif
 }
 
 //Based off the info from <http://beej.us/guide/bgnet/output/html/multipage/getaddrinfoman.html>

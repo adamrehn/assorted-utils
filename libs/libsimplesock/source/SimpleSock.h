@@ -85,6 +85,8 @@ class SimpleSock
 		static int PerformNonBlockingReceive(int sock, char* buffer, int bufSize, int& bytesRead);
 		static int PerformNonBlockingReceiveUdp(int sock, char* buffer, int bufSize, int& bytesRead, sockaddr_storage* receivedFrom, socklen_t* receivedFromLength);
 		
+		static bool SetReceiveTimeout(int sock, unsigned int seconds, unsigned int microseconds);
+		
 		//These are for TCP sockets
 		static bool Bind(int sock, const char* address, int port);
 		static bool Connect(int sock, const char* address, int port);
