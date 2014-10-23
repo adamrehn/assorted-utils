@@ -1,6 +1,6 @@
 /*
 //  SimpleSock Socket Abstraction Library
-//  Copyright (c) 2011-2013, Adam Rehn
+//  Copyright (c) 2011-2014, Adam Rehn
 //
 //  This library is a conventient little abstraction to help with using
 //  BSD sockets under Unix-like OSes and WinSock under Windows.
@@ -370,12 +370,18 @@ bool SimpleSock::JoinMulticastGroup(int udpSock, const char* address, int port, 
 	//Set SO_REUSEADDR for the socket so that other sockets may bind to the same source multicast address
 	//(SO_REUSEADDR and SO_REUSEPORT are treated identically for multicast addresses, according to
 	//<http://stackoverflow.com/questions/14388706/socket-options-so-reuseaddr-and-so-reuseport-how-do-they-differ-do-they-mean-t/14388707#14388707>
-	//so we use SO_REUSEADDR for maximum portability)
+	//so we use SO_REUSEADDR for maximum portability...)
 	int reuse = 1;
 	#ifdef _WIN32
 	setsockopt(udpSock, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse));
 	#else
 	setsockopt(udpSock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+	#endif
+	
+	//...Except that under Mac OS X, we actually need to set both SO_REUSEADDR and SO_REUSEPORT to 1:
+	//<https://github.com/robovm/robovm/issues/77>
+	#if defined __APPLE__ && defined __MACH__
+	setsockopt(udpSock, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse));
 	#endif
 	
 	//Bind the socket to the desired port on 0.0.0.0
