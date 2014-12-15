@@ -297,13 +297,13 @@ bool in (const string& needle, const string& haystack)
 
 bool starts_with (const string& start, const string& s)
 {
-	if (s.length() == 0) return false;
+	if (s.length() == 0 || start.length() > s.length()) return false;
 	return s.substr(0, start.length()) == start;
 }
 
 bool ends_with (const string& end, const string& s)
 {
-	if (s.length() == 0) return false;
+	if (s.length() == 0 || end.length() > s.length()) return false;
 	return s.substr(s.length() - end.length()) == end;
 }
 
