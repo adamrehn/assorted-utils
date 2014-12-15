@@ -428,13 +428,13 @@ long int hex_to_dec(const string& hex)
 }
 
 //Filesize suffixes
-#define KB   * (1024)
-#define MB   * (1024 * 1024)
-#define GB   * (1024 * 1024 * 1024)
+#define KB   * (1000)
+#define MB   * (1000 * 1000)
+#define GB   * (1000 * 1000 * 1000)
 
-#define KiB  * (1000)
-#define MiB  * (1000 * 1000)
-#define GiB  * (1000 * 1000 * 1000)
+#define KiB  * (1024)
+#define MiB  * (1024 * 1024)
+#define GiB  * (1024 * 1024 * 1024)
 
 int intFromSuffix(const string& s)
 {
