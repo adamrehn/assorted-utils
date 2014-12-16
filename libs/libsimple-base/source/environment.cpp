@@ -475,28 +475,32 @@ void set_terminal_cursor_position(int x, int y)
 }
 
 #ifdef _WIN32
-	#include <windows.h>
-	#include "SimpleGlob.h"
-
-	vector<string> glob(const string& pattern)
-	{
-		//On Windows we utilise the excellent SimpleGlob (MIT License)
+	#if __cplusplus < 201103L
 		
-		//Create a vector to hold the results
-		vector<string> results;
+		#include <windows.h>
+		#include "SimpleGlob.h"
 		
-		//Glob the pattern and loop through the results
-		CSimpleGlob glob(SG_GLOB_NODOT|SG_GLOB_FULLSORT|SG_GLOB_MARK);
-		if (SG_SUCCESS == glob.Add(pattern.c_str()))
+		vector<string> glob(const string& pattern)
 		{
-			for (int n = 0; n < glob.FileCount(); ++n) {
-				results.push_back(glob.File(n));
+			//On Windows we utilise the excellent SimpleGlob (MIT License)
+			
+			//Create a vector to hold the results
+			vector<string> results;
+			
+			//Glob the pattern and loop through the results
+			CSimpleGlob glob(SG_GLOB_NODOT|SG_GLOB_FULLSORT|SG_GLOB_MARK);
+			if (SG_SUCCESS == glob.Add(pattern.c_str()))
+			{
+				for (int n = 0; n < glob.FileCount(); ++n) {
+					results.push_back(glob.File(n));
+				}
 			}
+			
+			//Return the results
+			return results;
 		}
 		
-		//Return the results
-		return results;
-	}
+	#endif
 #else
 	//On platforms with native glob(), we use it
 	vector<string> glob(const string& pattern)

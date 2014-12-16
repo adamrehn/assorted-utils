@@ -59,11 +59,6 @@
 //Listed as "Freeware Public License (FPL)", which appears to be LGPL-compatible
 #include "sha1.h"
 
-//SimpleGlob (for systems without native glob)
-//Copyright (c) 2006-2007, Brodie Thiesfield
-//<http://code.jellycan.com/simpleopt/>
-#include "SimpleGlob.h"
-
 //A null-byte character that can be accessed from anywhere
 extern char* NULL_BYTE;
 

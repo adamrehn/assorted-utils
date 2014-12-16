@@ -55,8 +55,13 @@ string get_cli_password_hidden(string prompt);
 //Uses platform-specific CLI functionality to set the cursor position of stderr
 void set_terminal_cursor_position(int x, int y);
 
+//SimpleGlob, our glob() implementation under Windows, breaks under C++11 mode
+#if !defined(_WIN32) || __cplusplus < 201103L
+
 //Regardless of platform, we wrap around the native glob() implementation
 vector<string> glob(const string& pattern);
+
+#endif
 
 //On Windows, ShellExecuteEx is a pain to use, so we make things much simpler
 #ifdef _WIN32
