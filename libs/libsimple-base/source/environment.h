@@ -70,7 +70,68 @@ vector<string> glob(const string& pattern);
 	
 	//Monitors a directory for file changes and executes a callback when they occur.
 	//Exits when the callback function returns false.
-	void MonitorDirectoryForFileWrites(const char* dir, bool(*callback)(void));
+	template <typename CallbackTy>
+	void MonitorDirectoryForFileWrites(const std::string& dir, CallbackTy callback)
+	{
+		//Create a wait status and change handle
+		DWORD  dwWaitStatus;
+		HANDLE dwChangeHandle;
+		
+		//Set the change handle to monitor for file changes
+		dwChangeHandle = FindFirstChangeNotification
+		(
+			dir.c_str(),                   //Directory to monitor
+			false,                         //Exclude subdirectories
+			FILE_NOTIFY_CHANGE_LAST_WRITE  //Monitor for file changes
+		);
+		
+		//Check that the handle was created properly
+		if (dwChangeHandle == NULL || dwChangeHandle == INVALID_HANDLE_VALUE)
+		{
+			//Handle could not be created
+			return;
+		}
+		
+		//The main wait loop
+		while(1)
+		{
+			//Wait for a change notification
+			dwWaitStatus = WaitForSingleObject(dwChangeHandle, INFINITE);
+			
+			//This will hold the return value of the callback
+			//We exit when the callback returns false
+			bool callbackReturn = true;
+			
+			//Once we have received a notification, check the type
+			switch (dwWaitStatus)
+			{
+				case WAIT_OBJECT_0:
+					//A file was changed
+					//Execute the callback function
+					callbackReturn = callback();
+					
+					//Move on to waiting for the next notification
+					if (!FindNextChangeNotification(dwChangeHandle) || callbackReturn == false)
+					{
+						//Something went wrong, we could not proceed.
+						
+						//Close the handle and exit.
+						FindCloseChangeNotification(dwChangeHandle);
+						return;
+					}
+					
+					break;
+				
+				case WAIT_TIMEOUT:
+					//The wait timed out.
+					//This should not happen when INFINITE is used above.
+					
+					//Close the handle and exit.
+					FindCloseChangeNotification(dwChangeHandle);
+					return;
+			}
+		}
+	}
 #endif
 
 //Linux version of MonitorDirectoryForFileWrites, using inotify
