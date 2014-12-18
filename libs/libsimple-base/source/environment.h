@@ -180,8 +180,9 @@ void MonitorDirectoryForFileWrites(const char* dir, CallbackTy callback)
 
 #endif
 
-//Mac OSX (10.5 and higher) version of MonitorDirectoryForFileWrites, using the FSEvents API
-//Part of libsimple-osx-compat.so, OSX builds of apps using this function need to link with that as well
-#include "osx-compat.h"
+//Mac OS X (10.5 and higher) version of MonitorDirectoryForFileWrites, using the FSEvents API
+//Applications that use this version of MonitorDirectoryForFileWrites will need to link against both the
+//CoreServices and CoreFoundation frameworks, using "-framework CoreServices -framework CoreFoundation"
+#include "osx-fsevents.h"
 
 #endif
