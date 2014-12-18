@@ -140,11 +140,11 @@ vector<string> glob(const string& pattern);
 #include <sys/inotify.h>
 
 template <typename CallbackTy>
-void MonitorDirectoryForFileWrites(const char* dir, CallbackTy callback)
+void MonitorDirectoryForFileWrites(const string& dir, CallbackTy callback)
 {
 	//Setup the watch
 	int inotifyDescriptor = inotify_init();
-	int watchDescriptor = inotify_add_watch(inotifyDescriptor, dir, IN_MODIFY);
+	int watchDescriptor = inotify_add_watch(inotifyDescriptor, dir.c_str(), IN_MODIFY);
 	
 	//Prepare the buffer
 	int bufSize = (sizeof(inotify_event) + 16) * 1024;
