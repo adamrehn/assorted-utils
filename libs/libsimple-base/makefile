@@ -42,17 +42,12 @@ ifeq ($(ISMINGW),0)
 	endif
 endif
 
-# Determine if we are compiling for OSX (and NOT iOS)
+# Determine if we are compiling for OS X (and NOT iOS)
 ifeq ($(UNAME), Darwin)
 	ifeq ($(SDKROOT),)
 		MESSAGE := $(MESSAGE), produce fat object files and static lib...
 		CXXFLAGS += -Wall -arch i386 -arch x86_64
 		CREATELIB = libtool -static -o $(BUILD_DIR)/lib/libsimple-base.a $(OBJECTS)
-		
-		# Under OSX, we generate libsimple-osx-compat.dylib (two versions - a normal one, and one designed to be stored in the application bundle with apps that link against it)
-		OSX_COMPAT_OBJECTS = $(BUILD_DIR)/obj/osx-compat/osx-compat_fsevents.o
-		OSX_COMPAT_CREATELIB = libtool -dynamic -o $(BUILD_DIR)/lib/libsimple-osx-compat.dylib -install_name /usr/lib/libsimple-osx-compat.dylib -macosx_version_min 10.5 -lstdc++ -lSystem -framework CoreServices -framework CoreFoundation $(OSX_COMPAT_OBJECTS)
-		OSX_COMPAT_CREATELIB_BUNDLEABLE = libtool -dynamic -o $(BUILD_DIR)/lib/libsimple-osx-compat_bundleable.dylib -install_name @executable_path/../Frameworks/libsimple-osx-compat_bundleable.dylib -macosx_version_min 10.5 -lstdc++ -lSystem -framework CoreServices -framework CoreFoundation $(OSX_COMPAT_OBJECTS)
 	else
 		
 		# When compiling for iOS, the static library will be built as single-architecture and then combined with other architectures using lipo
@@ -69,7 +64,7 @@ endif
 # Library objects
 OBJECTS = $(BUILD_DIR)/obj/StartupArgsParser.o $(BUILD_DIR)/obj/binary_manipulation.o $(BUILD_DIR)/obj/bitwise.o $(BUILD_DIR)/obj/checksum.o $(BUILD_DIR)/obj/endianness.o $(BUILD_DIR)/obj/environment.o $(BUILD_DIR)/obj/file_manipulation.o $(BUILD_DIR)/obj/maths.o $(BUILD_DIR)/obj/multiple_input_files.o $(BUILD_DIR)/obj/sha1.o $(BUILD_DIR)/obj/string_manipulation.o $(BUILD_DIR)/obj/time.o $(BUILD_DIR)/obj/crc32.o $(BUILD_DIR)/obj/random.o
 
-all: dirs $(OBJECTS) $(OSX_COMPAT_OBJECTS)
+all: dirs $(OBJECTS)
 	@echo $(MESSAGE)...
 	$(CREATELIB)
 	$(OSX_COMPAT_CREATELIB)
@@ -118,20 +113,9 @@ $(BUILD_DIR)/obj/crc32.o: $(SRC_DIR)/crc32.c $(SRC_DIR)/crc32.h
 $(BUILD_DIR)/obj/random.o: $(SRC_DIR)/random.cpp $(SRC_DIR)/random.h
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-# Rules for libsimple-osx-compat.dylib object files
-ifeq ($(UNAME), Darwin)
-ifeq ($(SDKROOT),)
-
-$(BUILD_DIR)/obj/osx-compat/osx-compat_fsevents.o: $(SRC_DIR)/osx-compat/osx-compat_fsevents.cpp $(SRC_DIR)/osx-compat.h
-	$(CXX) -c $(CXXFLAGS) $< -o $@
-
-endif
-endif
-
 dirs:
 	@test -d $(BUILD_DIR) || mkdir $(BUILD_DIR)
 	@test -d $(BUILD_DIR)/obj || mkdir $(BUILD_DIR)/obj
-	@test -d $(BUILD_DIR)/obj/osx-compat || mkdir $(BUILD_DIR)/obj/osx-compat
 	@test -d $(BUILD_DIR)/lib || mkdir $(BUILD_DIR)/lib
 	@test -d $(BUILD_DIR)/include || mkdir $(BUILD_DIR)/include
 	@test -d $(BUILD_DIR)/include/simple-base || mkdir $(BUILD_DIR)/include/simple-base
