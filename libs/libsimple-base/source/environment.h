@@ -144,7 +144,7 @@ void MonitorDirectoryForFileWrites(const string& dir, CallbackTy callback)
 {
 	//Setup the watch
 	int inotifyDescriptor = inotify_init();
-	int watchDescriptor = inotify_add_watch(inotifyDescriptor, dir.c_str(), IN_MODIFY);
+	int watchDescriptor = inotify_add_watch(inotifyDescriptor, dir.c_str(), IN_ALL_EVENTS);
 	
 	//Prepare the buffer
 	int bufSize = (sizeof(inotify_event) + 16) * 1024;
@@ -164,10 +164,8 @@ void MonitorDirectoryForFileWrites(const string& dir, CallbackTy callback)
 		{
 			inotify_event* event = (inotify_event*)buffer + i;
 			
-			//Execute the callback if a file was changed
-			if (event->mask & IN_MODIFY) {
-				callbackReturn = callback();
-			}
+			//Execute the callback
+			callbackReturn = callback();
 			
 			i += sizeof(inotify_event) + event->len;
 		}
