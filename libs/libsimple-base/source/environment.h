@@ -136,6 +136,7 @@ vector<string> glob(const string& pattern);
 
 //Linux version of MonitorDirectoryForFileWrites, using inotify
 #ifdef __linux__
+#include <unistd.h>
 #include <sys/inotify.h>
 
 template <typename CallbackTy>
