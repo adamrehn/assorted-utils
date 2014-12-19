@@ -125,6 +125,10 @@ CFMutableArrayRef create_cfarray_from_path(T path)
 template <typename CallbackTy>
 struct callbackContainer
 {
+	callbackContainer(CallbackTy callback) {
+		this->callback = callback;
+	}
+	
 	CallbackTy callback;
 };
 
@@ -154,8 +158,7 @@ void MonitorDirectoryForFileWrites(const string& dir, CallbackTy callback)
 	
 	//Store the actual callback pointer in the context's info field,
 	//so it will be passed to our internal callback as clientCallBackInfo
-	_fsevents_imp::callbackContainer<CallbackTy>* cContainer = new _fsevents_imp::callbackContainer<CallbackTy>;
-	cContainer->callback = callback;
+	_fsevents_imp::callbackContainer<CallbackTy>* cContainer = new _fsevents_imp::callbackContainer<CallbackTy>(callback);
 	context.info = (void*)cContainer;
 	
 	//Create the array holding the path string
