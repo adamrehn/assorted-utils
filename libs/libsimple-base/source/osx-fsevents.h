@@ -125,9 +125,7 @@ CFMutableArrayRef create_cfarray_from_path(T path)
 template <typename CallbackTy>
 struct callbackContainer
 {
-	callbackContainer(CallbackTy callback) {
-		this->callback = callback;
-	}
+	callbackContainer(CallbackTy c) : callback(c) {}
 	
 	CallbackTy callback;
 };
