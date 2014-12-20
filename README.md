@@ -17,4 +17,5 @@ Directory Structure
 - **/tools**<br />Tools
   - tools/**compile_file** - utility to create C-code byte array representations of binary files, suitable for embedding in executables.
   - tools/**mergelib** - utility to merge one or more static libraries into a single output static library, utilising "libtool" under Darwin and "ar" under all other platforms.
+  - tools/**midi2rmid** - utility to combine MIDI and DLS files into RMID files.
   - tools/**splice** - binary file splicer utility.
