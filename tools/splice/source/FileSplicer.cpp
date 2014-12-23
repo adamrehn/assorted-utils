@@ -45,6 +45,8 @@ ostream& operator<<(ostream& o, const FileSliceDetails& details)
 	for (auto currPair : details.slices) {
 		o << "\t" << currPair.first << " to " << currPair.second << endl;
 	}
+	
+	return o;
 }
 
 void FileSplicer::copySlice(istream& in, ostream& out, int64_t offsetStart, int64_t offsetEnd)
