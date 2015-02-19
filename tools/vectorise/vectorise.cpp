@@ -14,8 +14,9 @@
 //  
 //    $0    The filename
 //    $1    The basename of the filename
-//    $2    The basename of the filename with the file extension removed
-//    $3    The file extension of the filename
+//    $2    The filename with the file extension removed
+//    $3    The basename of the filename with the file extension removed
+//    $4    The file extension of the filename
 //  
 //  If $0 is not included in the command, the filename will be appended at the end.
 //  
@@ -56,8 +57,9 @@ void InvokeForFile(const string& command, const string& file)
 	string expandedCommand = command;
 	expandedCommand = str_replace("$0", file,                            expandedCommand);
 	expandedCommand = str_replace("$1", basename(file),                  expandedCommand);
-	expandedCommand = str_replace("$2", strip_extension(basename(file)), expandedCommand);
-	expandedCommand = str_replace("$3", get_extension(basename(file)),   expandedCommand);
+	expandedCommand = str_replace("$2", strip_extension(file),           expandedCommand);
+	expandedCommand = str_replace("$3", strip_extension(basename(file)), expandedCommand);
+	expandedCommand = str_replace("$4", get_extension(basename(file)),   expandedCommand);
 	
 	//If $0 did not appear in the command, append the filename to the end
 	if (shouldAppendFilename) {
@@ -105,8 +107,9 @@ int main (int argc, char* argv[])
 		     << "The following backreference-style tokens are supported in the command:" << endl << endl
 		     << "  $0    The filename" << endl
 		     << "  $1    The basename of the filename" << endl
-		     << "  $2    The basename of the filename with the file extension removed" << endl
-		     << "  $3    The file extension of the filename" << endl << endl
+		     << "  $2    The filename with the file extension removed" << endl
+		     << "  $3    The basename of the filename with the file extension removed" << endl
+		     << "  $4    The file extension of the filename" << endl << endl
 		     << "If $0 is not included in the command, the filename will be appended at the end." << endl;
 	}
 	
