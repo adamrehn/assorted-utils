@@ -26,7 +26,7 @@ ifeq ($(ISMINGW),1)
 	LDFLAGS += -static-libgcc -static-libstdc++
 endif
 
-# Under OSX, we use clang++ as the compiler and ensure we link against libstdc++
+# Under OS X, we use clang++ as the compiler and ensure we link against libstdc++
 ifeq ($(UNAME), Darwin)
 	CXX = clang++
 	LDFLAGS += -lstdc++
@@ -38,8 +38,21 @@ all: dirs $(BUILD_DIR)/bin/vectorise$(EXE_EXT) $(BUILD_DIR)/bin/vectorise-omp$(E
 $(BUILD_DIR)/bin/vectorise$(EXE_EXT): ./vectorise.cpp
 	$(CXX) -o $@ ./vectorise.cpp $(CXXFLAGS) $(LDFLAGS)
 
+
+ifeq ($(UNAME), Darwin)
+
+# Don't build the OpenMP version under Darwin
+$(BUILD_DIR)/bin/vectorise-omp$(EXE_EXT): ./vectorise.cpp
+	@echo Skipping OpenMP build under Darwin until OpenMP support is added to Clang.
+
+else
+
+# Under all other operating systems, build the OpenMP version
 $(BUILD_DIR)/bin/vectorise-omp$(EXE_EXT): ./vectorise.cpp
 	$(CXX) -o $@ ./vectorise.cpp -fopenmp -D_ENABLE_OPENMP $(CXXFLAGS) $(LDFLAGS)
+
+endif
+
 
 dirs:
 	@test -d $(BUILD_DIR) || mkdir $(BUILD_DIR)
@@ -52,7 +65,9 @@ install_dirs:
 install: install_dirs
 	cp -r $(BUILD_DIR)/bin/* $(PREFIX)/bin/
 	chmod 777 $(PREFIX)/bin/vectorise$(EXE_EXT)
+ifneq ($(UNAME), Darwin)
 	chmod 777 $(PREFIX)/bin/vectorise-omp$(EXE_EXT)
+endif
 
 clean:
 	rm $(BUILD_DIR)/bin/*
