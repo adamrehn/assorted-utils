@@ -92,13 +92,27 @@ int main (int argc, char* argv[])
 		}
 		
 		//Invoke the command once for each input file
-		for (vector<string>::iterator currFile = files.begin(); currFile != files.end(); ++currFile)
+		#ifdef _ENABLE_OPENMP
+		#pragma omp parallel for
+		#endif
+		for (unsigned int i = 0; i < files.size(); ++i)
 		{
-			clog << "Invoking for " << *currFile << "..." << endl;
-			InvokeForFile(command, *currFile);
+			string& currFile = files[i];
+			
+			//When executing in parallel, output can be interspersed, so simply print stars
+			#ifdef _ENABLE_OPENMP
+			clog << "*";
+			#else
+			clog << "Invoking for " << currFile << "..." << endl;
+			#endif
+			
+			InvokeForFile(command, currFile);
 		}
 		
 		//Report the total number of invocations
+		#ifdef _ENABLE_OPENMP
+		clog << endl;
+		#endif
 		clog << "Invoked " << files.size() << " time(s)." << endl;
 	}
 	else

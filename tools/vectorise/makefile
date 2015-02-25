@@ -32,21 +32,17 @@ ifeq ($(UNAME), Darwin)
 	LDFLAGS += -lstdc++
 endif
 
-# Object files
-OBJECT_FILES = $(BUILD_DIR)/obj/vectorise.o
-
-all: dirs $(BUILD_DIR)/bin/vectorise$(EXE_EXT)
+all: dirs $(BUILD_DIR)/bin/vectorise$(EXE_EXT) $(BUILD_DIR)/bin/vectorise-omp$(EXE_EXT)
 	@echo Done!
 
-$(BUILD_DIR)/bin/vectorise$(EXE_EXT): $(OBJECT_FILES)
-	$(CXX) -o $@ $(OBJECT_FILES) $(CXXFLAGS) $(LDFLAGS)
+$(BUILD_DIR)/bin/vectorise$(EXE_EXT): ./vectorise.cpp
+	$(CXX) -o $@ ./vectorise.cpp $(CXXFLAGS) $(LDFLAGS)
 
-$(BUILD_DIR)/obj/vectorise.o: ./vectorise.cpp
-	$(CXX) -c $< -o $@ $(CXXFLAGS)
+$(BUILD_DIR)/bin/vectorise-omp$(EXE_EXT): ./vectorise.cpp
+	$(CXX) -o $@ ./vectorise.cpp -fopenmp -D_ENABLE_OPENMP $(CXXFLAGS) $(LDFLAGS)
 
 dirs:
 	@test -d $(BUILD_DIR) || mkdir $(BUILD_DIR)
-	@test -d $(BUILD_DIR)/obj || mkdir $(BUILD_DIR)/obj
 	@test -d $(BUILD_DIR)/bin || mkdir $(BUILD_DIR)/bin
 
 install_dirs:
@@ -56,6 +52,7 @@ install_dirs:
 install: install_dirs
 	cp -r $(BUILD_DIR)/bin/* $(PREFIX)/bin/
 	chmod 777 $(PREFIX)/bin/vectorise$(EXE_EXT)
+	chmod 777 $(PREFIX)/bin/vectorise-omp$(EXE_EXT)
 
 clean:
-	rm $(BUILD_DIR)/obj/*.o
+	rm $(BUILD_DIR)/bin/*
