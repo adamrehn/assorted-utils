@@ -68,13 +68,18 @@ string basename (const string& path)
 
 string dirname (const string& path)
 {
-	//Truncate everything after the last ocurrence of a slash
+	//If path is "/", return "/"
+	if (path == "/") {
+		return path;
+	}
+	
+	//Truncate everything after (and including) the last ocurrence of a slash
 	size_t pos = path.find_last_of("\\/");
 	if (pos != string::npos) {
-		return path.substr(0, pos + 1);
+		return path.substr(0, pos);
 	}
 	else {
-		return string(""); //Return an empty string
+		return string(".");
 	}
 }
 
