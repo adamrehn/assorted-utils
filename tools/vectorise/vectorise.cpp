@@ -12,11 +12,12 @@
 //  
 //  The following backreference-style tokens are supported in the command:
 //  
-//    $0    The filename
-//    $1    The basename of the filename
-//    $2    The filename with the file extension removed
-//    $3    The basename of the filename with the file extension removed
-//    $4    The file extension of the filename
+//    $0    The full file path
+//    $1    The filename
+//    $2    The full file path with the file extension removed
+//    $3    The filename with the file extension removed
+//    $4    The file extension
+//    $5    The directory component of the full file path
 //  
 //  If $0 is not included in the command, the filename will be appended at the end.
 //  
@@ -60,6 +61,7 @@ void InvokeForFile(const string& command, const string& file)
 	expandedCommand = str_replace("$2", strip_extension(file),           expandedCommand);
 	expandedCommand = str_replace("$3", strip_extension(basename(file)), expandedCommand);
 	expandedCommand = str_replace("$4", get_extension(basename(file)),   expandedCommand);
+	expandedCommand = str_replace("$5", dirname(file),                   expandedCommand);
 	
 	//If $0 did not appear in the command, append the filename to the end
 	if (shouldAppendFilename) {
@@ -119,11 +121,12 @@ int main (int argc, char* argv[])
 	{
 		clog << "Usage syntax:\n" << argv[0] << " <COMMAND> <FILE/PATTERN> <FILE/PATTERN> ..." << endl << endl
 		     << "The following backreference-style tokens are supported in the command:" << endl << endl
-		     << "  $0    The filename" << endl
-		     << "  $1    The basename of the filename" << endl
-		     << "  $2    The filename with the file extension removed" << endl
-		     << "  $3    The basename of the filename with the file extension removed" << endl
-		     << "  $4    The file extension of the filename" << endl << endl
+		     << "  $0    The full file path" << endl
+		     << "  $1    The filename" << endl
+		     << "  $2    The full file path with the file extension removed" << endl
+		     << "  $3    The filename with the file extension removed" << endl
+		     << "  $4    The file extension" << endl
+		     << "  $5    The directory component of the full file path" << endl << endl
 		     << "If $0 is not included in the command, the filename will be appended at the end." << endl;
 	}
 	
