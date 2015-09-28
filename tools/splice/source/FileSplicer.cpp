@@ -65,7 +65,7 @@ void FileSplicer::copySlice(istream& in, ostream& out, int64_t offsetStart, int6
 	{
 		//Attempt to read the data from the input file
 		size_t bytesRead = in.read(buffer, chunkSize).gcount();
-		if (bytesRead == 0 || in.fail()) {
+		if ((bytesRead == 0 || in.fail()) && !in.eof()) {
 			throw std::runtime_error("I/O error reading input file");
 		}
 		
