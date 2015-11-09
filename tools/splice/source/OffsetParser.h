@@ -62,8 +62,8 @@ class OffsetParser
 			}
 			
 			//If the either offset is negative, subtract its absolute value from the other
-			if      (first < 0)  { first  = second - abs(first);  }
-			else if (second < 0) { second = first  - abs(second); }
+			if      (first < 0)  { first  = second - std::abs(first);  }
+			else if (second < 0) { second = first  - std::abs(second); }
 			
 			//Clip negative computed values to zero
 			first  = std::max(first,  (ValueTy)0);
