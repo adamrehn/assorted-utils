@@ -116,6 +116,7 @@ int main (int argc, char* argv[])
 				}
 				
 				//Remove the header and append the data
+				if (csvData.substr(csvData.length() - 1, 1) != "\n") { csvData.append("\n"); }
 				csvData.append(removeHeader(fileCsv));
 			}
 			
