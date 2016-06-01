@@ -1,6 +1,6 @@
 /*
 //  CSV File Concatenator
-//  Copyright (c) 2015, Adam Rehn
+//  Copyright (c) 2015-2016, Adam Rehn
 //  
 //  ---
 //  
@@ -32,45 +32,27 @@
 //  SOFTWARE.
 */
 #include <iostream>
+#include <fstream>
 #include <stdexcept>
 #include <vector>
 #include <string>
 #include <simple-base/base.h>
 
+#define BUFSIZE (4 * 1024 * 1024)
+
 using namespace std;
 
-//Retrieves the contents of a CSV file, or throws an error if the file couldn't be read
-string getFileContentsOrError(const string& filename)
-{
-	string contents = file_get_contents(filename);
-	if (contents.empty()) {
-		throw std::runtime_error("Failed to open file \"" + filename + "\"");
-	}
-	
-	return unix_line_endings(contents);
-}
-
 //Extracts the header from a CSV file, or throws an error if one wasn't found
-string extractHeader(const string& csvData, const string& filename)
+string extractHeader(istream& csvFile, const string& filename)
 {
-	size_t newlinePos = csvData.find("\n");
-	if (newlinePos == string::npos) {
-		throw std::runtime_error("no header row found in file \"" + filename + "\"!");
+	string header = "";
+	getline(csvFile, header, '\n');
+	
+	if (csvFile.fail()) {
+		throw std::runtime_error("failed to read header row from file \"" + filename + "\"!");
 	}
 	
-	return csvData.substr(0, newlinePos);
-}
-
-//Removes the header from a CSV file, if one is found
-string removeHeader(const string& csvData)
-{
-	size_t newlinePos = csvData.find("\n");
-	if (newlinePos != string::npos) {
-		return csvData.substr(newlinePos + 1);
-	}
-	
-	//No header row found
-	return csvData;
+	return header;
 }
 
 int main (int argc, char* argv[])
@@ -79,7 +61,7 @@ int main (int argc, char* argv[])
 	{
 		if (argc > 2)
 		{
-			string outfile = argv[1];
+			string outfilePath = argv[1];
 			vector<string> files;
 			
 			//Expand any wildcards in the input file list
@@ -101,29 +83,46 @@ int main (int argc, char* argv[])
 				throw std::runtime_error("no input files specified.");
 			}
 			
-			//Read the contents of the first CSV file, and extract the header row
-			string csvData   = getFileContentsOrError(files[0]);
-			string headerRow = extractHeader(csvData, files[0]);
-			files.erase(files.begin());
+			//Attempt to open the output file
+			ofstream outfile(outfilePath.c_str(), ios::binary);
+			if (!outfile.is_open()) {
+				throw std::runtime_error("failed to open output file!");
+			}
 			
-			//Iterate over the remaining input CSV files
-			for (vector<string>::iterator currFile = files.begin(); currFile != files.end(); ++currFile)
+			//Read the header row of the first CSV file and write it to the output file
+			ifstream firstFile(files[0].c_str(), ios::binary);
+			string headerRow = extractHeader(firstFile, files[0]);
+			firstFile.close();
+			outfile << headerRow << "\n";
+			
+			//Iterate over each of the input CSV files
+			for (vector<string>::iterator currFilePath = files.begin(); currFilePath != files.end(); ++currFilePath)
 			{
 				//Verify that the file's header row matches the one we're using
-				string fileCsv = getFileContentsOrError(*currFile);
-				if (extractHeader(fileCsv, *currFile) != headerRow) {
-					throw std::runtime_error("the header for file \"" + *currFile + "\" does not match the header row of the first input file!");
+				ifstream currFile(currFilePath->c_str(), ios::binary);
+				if (extractHeader(currFile, *currFilePath) != headerRow) {
+					throw std::runtime_error("the header for file \"" + *currFilePath + "\" does not match the header row of the first input file!");
 				}
 				
-				//Remove the header and append the data
-				if (csvData.substr(csvData.length() - 1, 1) != "\n") { csvData.append("\n"); }
-				csvData.append(removeHeader(fileCsv));
+				//Copy the remaining rows to the output file
+				char buffer[BUFSIZE];
+				size_t bytesRead = 0;
+				bool hasTrailingNewline = false;
+				while ( (bytesRead = currFile.read(buffer, sizeof(buffer)).gcount()) != 0 )
+				{
+					hasTrailingNewline = (buffer[bytesRead - 1] == '\n');
+					outfile.write(buffer, bytesRead);
+				}
+				
+				//If the input file didn't end with a trailing newline, append one ourselves
+				if (hasTrailingNewline == false) {
+					outfile << "\n";
+				}
+				
+				currFile.close();
 			}
 			
-			//Write the concatenated CSV data to the output file
-			if (file_put_contents(outfile, csvData) == false) {
-				throw std::runtime_error("failed to write output file!");
-			}
+			outfile.close();
 		}
 		else {
 			clog << "Usage syntax:\ncat-csv OUTFILE <FILE/PATTERN> <FILE/PATTERN> ..." << endl;
