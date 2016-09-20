@@ -73,8 +73,11 @@ int main (int argc, char* argv[])
 			//The 20-byte RMID file header           Placeholder for RMID size                                   Placeholder for MIDI size
 			char rmidHeader[] = {'R', 'I', 'F', 'F', 0x0, 0x0, 0x0, 0x0, 'R', 'M', 'I', 'D', 'd', 'a', 't', 'a', 0x0, 0x0, 0x0, 0x0};
 			
+			//If the MIDI filesize is odd, we need to append a padding byte to the end of the MIDI data
+			uint8_t midiPaddingSize = (((midiSize % 2) == 1) ? 1 : 0);
+			
 			//Fill the placeholder header fields with the length values
-			uint32_t rmidSize = RMID_CHUNK_HEADER_SIZE + midiSize + dlsSize;
+			uint32_t rmidSize = RMID_CHUNK_HEADER_SIZE + midiSize + midiPaddingSize + dlsSize;
 			rmidSize = toLittleEndian(rmidSize);
 			midiSize = toLittleEndian(midiSize);
 			memcpy(rmidHeader + 4,  &rmidSize, sizeof(uint32_t));
@@ -90,9 +93,14 @@ int main (int argc, char* argv[])
 			if (!dlsFileStream.is_open())  { throw std::runtime_error("failed to open input file \"" + dlsFile  + "\""); }
 			if (!rmidFileStream.is_open()) { throw std::runtime_error("failed to open input file \"" + rmidFile + "\""); }
 			
-			//Write the header, MIDI data, and DLS data
+			//Write the header, MIDI data, MIDI padding (if needed), and DLS data
 			rmidFileStream.write(rmidHeader, sizeof(rmidHeader));
 			copyFileData(midiFileStream, rmidFileStream);
+			if (midiPaddingSize != 0)
+			{
+				const char pad = 0;
+				rmidFileStream.write(&pad, 1);
+			}
 			copyFileData(dlsFileStream,  rmidFileStream);
 			
 			//Close the input and output files
