@@ -11,11 +11,9 @@ under Unix-based OSes, and WinSock under Windows.
 
 See the file INSTALL for installation instructions.
 
-To use the library in an application, use the preprocessor directive
+To use the library in an application, simply use the preprocessor directive
 
 #include <simplesock/SimpleSock.h>
-
-and add "-lsimplesock" to the compiler options to link with the static library.
 
 
 3.) License
